@@ -38,30 +38,30 @@ EXTRA_TOOLS: List[Dict[str, Any]] = [
             "required": ["booking_code"],
         },
     },
-    {
-        "name": "next_available_day",
-        "description": (
-            "Use when a customer asks for the soonest day they can travel on a route. "
-            "After looking up the booking, provide the disrupted segment's origin, "
-            "destination, date, and cabin; date must be YYYY-MM-DD and cabin is Y (main) "
-            "or J (first). Returns the earliest date on or after that date with an open "
-            "seat for one passenger, or says no open seat was found in the schedule."
-        ),
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "origin": {"type": "string", "description": "Three-letter origin airport code."},
-                "dest": {"type": "string", "description": "Three-letter destination airport code."},
-                "date": {"type": "string", "description": "Start searching on this date, YYYY-MM-DD."},
-                "cabin": {
-                    "type": "string",
-                    "enum": ["Y", "J"],
-                    "description": "Cabin to search: Y for main or J for first.",
-                },
-            },
-            "required": ["origin", "dest", "date"],
-        },
-    },
+    # {
+    #     "name": "next_available_day",
+    #     "description": (
+    #         "Use when a customer asks for the soonest day they can travel on a route. "
+    #         "After looking up the booking, provide the disrupted segment's origin, "
+    #         "destination, date, and cabin; date must be YYYY-MM-DD and cabin is Y (main) "
+    #         "or J (first). Returns the earliest date on or after that date with an open "
+    #         "seat for one passenger, or says no open seat was found in the schedule."
+    #     ),
+    #     "input_schema": {
+    #         "type": "object",
+    #         "properties": {
+    #             "origin": {"type": "string", "description": "Three-letter origin airport code."},
+    #             "dest": {"type": "string", "description": "Three-letter destination airport code."},
+    #             "date": {"type": "string", "description": "Start searching on this date, YYYY-MM-DD."},
+    #             "cabin": {
+    #                 "type": "string",
+    #                 "enum": ["Y", "J"],
+    #                 "description": "Cabin to search: Y for main or J for first.",
+    #             },
+    #         },
+    #         "required": ["origin", "dest", "date"],
+    #     },
+    # },
     {
         "name": "care_entitlements",
         "description": (
@@ -92,30 +92,30 @@ EXTRA_TOOLS: List[Dict[str, Any]] = [
             "required": ["pnr", "cause_code", "delay_minutes", "status"],
         },
     },
-    {
-        "name": "fare_rules",
-        "description": (
-            "Use when a customer asks why he do not get a hotel"
-            "Read the published Larkspur Customer Commitment and fare rules excerpt for a"
-            "specific handbook section. Use this when the customer asks what the rule says, "
-            "wants a citation, or challenges an entitlement decision. Pass either a section "
-            "wait' or 'fare families'. Returns the full text of that handbook section. It is"
-            "policy table for the actual entitlement decision."
-        ),
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "section": {"type": "string", "description": "Which handbook section to read: a number like '6' or words from the title such as 'fare families', 'when we delay', 'care while you wait', or 'chat automation'."},
-                },
-            "required": ["section"],
-        },
-    },
+    # {
+    #     "name": "fare_rules",
+    #     "description": (
+    #         "Use when a customer asks why he do not get a hotel"
+    #         "Read the published Larkspur Customer Commitment and fare rules excerpt for a"
+    #         "specific handbook section. Use this when the customer asks what the rule says, "
+    #         "wants a citation, or challenges an entitlement decision. Pass either a section "
+    #         "wait' or 'fare families'. Returns the full text of that handbook section. It is"
+    #         "policy table for the actual entitlement decision."
+    #     ),
+    #     "input_schema": {
+    #         "type": "object",
+    #         "properties": {
+    #             "section": {"type": "string", "description": "Which handbook section to read: a number like '6' or words from the title such as 'fare families', 'when we delay', 'care while you wait', or 'chat automation'."},
+    #             },
+    #         "required": ["section"],
+    #     },
+    # },
 ]   # ✏️ Build 2, step 2.1: schemas for the tools you add
 LOCAL_TOOLS: Dict[str, Any] = {
     "seats_left": seats_left,
-    "next_available_day": next_available_day,
+    # "next_available_day": next_available_day,
     "care_entitlements": care_entitlements,
-    "fare_rules": fare_rules,
+    # "fare_rules": fare_rules,
 }         # ✏️ Build 2, step 2.1: the functions behind them
  
  
@@ -180,7 +180,8 @@ def run_agent(pnr: str, last_name: str, message: str) -> str:            # ✏�
 def tool_list() -> List[Dict[str, Any]]:                   # ✏️ Build 2, step 2.2
     """Given. Exactly what Claude is offered on every turn; run.py --show-tools
     prints this list."""
-    return build_tools() + EXTRA_TOOLS
+    # return build_tools() + EXTRA_TOOLS
+    return mcp_client.tools()
  
  
 # ──────────────────────────────────────────────────────────────────────────────
