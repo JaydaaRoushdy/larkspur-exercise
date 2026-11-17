@@ -8,7 +8,7 @@ Number: 19,406 to 19,430 input tokens per contact, measured over 15 runs each (5
 Safety check: It never finalizes a rebooking on chat consent alone; the customer's Confirm-click must provide the required token.
 Next: Have the agent answer in the language recorded on the booking, so customers can handle a disruption in their own language.
 Still broken: When a booking has multiple passengers, the agent can suggest a travel date with an open seat for only one person, leaving the rest of the party without seats.
-Lever: <cost | speed | intelligence>
+Lever: cost 
  
 ## Priya asked
  

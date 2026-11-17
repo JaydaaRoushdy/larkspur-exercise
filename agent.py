@@ -132,22 +132,23 @@ def tool_results(response) -> List[Dict[str, Any]]:
     # three branches, no try/except in this file: mcp_client.call_remote() and
     # support.call_local() answer with an error dict instead of raising, and both
     # record what came back on the trace
-    results = []
-    for block in response.content:
-        if getattr(block, "type", None) != "tool_use":
-            continue
+    from concurrent.futures import ThreadPoolExecutor
+
+    blocks = [b for b in response.content if getattr(b, "type", None) == "tool_use"]
+
+    def run_one(block) -> Dict[str, Any]:
         if block.name in mcp_client.tool_names:
             output = mcp_client.call_remote(block.name, block.input)
         elif block.name in LOCAL_TOOLS:
             output = call_local(LOCAL_TOOLS[block.name], block.name, block.input)
         else:
             output = execute_tool(block.name, block.input)
-        results.append({
-            "type": "tool_result",
-            "tool_use_id": block.id,
-            "content": str(output),
-        })
-    return results
+        return {"type": "tool_result", "tool_use_id": block.id, "content": str(output)}
+
+    if len(blocks) <= 1:                      # nothing to overlap
+        return [run_one(b) for b in blocks]
+    with ThreadPoolExecutor(max_workers=len(blocks)) as pool:
+        return list(pool.map(run_one, blocks))   # map keeps the original order
  
  
 def run_agent(pnr: str, last_name: str, message: str) -> str:            # ✏️ Build 1, step 1.2
@@ -157,9 +158,16 @@ def run_agent(pnr: str, last_name: str, message: str) -> str:            # ✏�
     messages = [
         {"role": "user", "content": f"PNR {pnr}, last name {last_name}. {message}"},
     ]
- 
+    # Prompt caching: tools + stable system text are identical on every call, so mark
+    # the end of that prefix. The timestamp changes every second, so it goes AFTER the marker.
+    system = [
+        {"type": "text", "text": SYSTEM_PROMPT + TONE_ADDENDUM,
+         "cache_control": {"type": "ephemeral"}},
+        {"type": "text", "text": runtime_preamble()},
+    ]
+
     response = client.messages.create(
-        model=MODEL, max_tokens=4096, system=runtime_preamble() + SYSTEM_PROMPT + TONE_ADDENDUM,
+        model=MODEL, max_tokens=4096, system=system,
         thinking={"type": "adaptive"}, tools=tools, messages=messages,
     )
  
@@ -169,7 +177,7 @@ def run_agent(pnr: str, last_name: str, message: str) -> str:            # ✏�
         messages.append({"role": "assistant", "content": response.content})
         messages.append({"role": "user", "content": tool_results(response)})
         response = client.messages.create(
-            model=MODEL, max_tokens=4096, system=runtime_preamble() + SYSTEM_PROMPT + TONE_ADDENDUM,
+            model=MODEL, max_tokens=4096, system=system,
             thinking={"type": "adaptive"}, tools=tools, messages=messages,
         )
         turns += 1

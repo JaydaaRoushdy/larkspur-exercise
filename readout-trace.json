@@ -7,17 +7,17 @@
     "check_policy",
     "search_alternatives"
   ],
-  "saw_thinking": true,
+  "saw_thinking": false,
   "used_format": false,
   "used_tool_choice_none": false,
   "streamed": false,
   "deltas_seen": 0,
   "tokens": {
     "input": 20214,
-    "output": 1117,
+    "output": 825,
     "cache_read": 0,
     "cache_write": 0
   },
   "cache_hit_ratio": null,
-  "elapsed": 13.6
+  "elapsed": 11.3
 }
